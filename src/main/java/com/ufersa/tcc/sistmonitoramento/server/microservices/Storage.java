@@ -99,7 +99,7 @@ public class Storage implements Runnable {
     }
 
     private void sendResponse(List<String> linhas) {
-        try (Socket socket = new Socket(Env.localhost, 10000);
+        try (Socket socket = new Socket(Env.proxyHost, 10000);
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()), 16384)) {
 
             for (String linha : linhas) {

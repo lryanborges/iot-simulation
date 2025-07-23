@@ -21,6 +21,7 @@
 
         private static boolean firewallOn = true;
 
+        String serverIP;
         int PORT;
         int PORTTOCONNECT;
 
@@ -38,7 +39,8 @@
         private Connection connection;
         private final static String QUEUE_NAME = "iot_logs";
 
-        public PackageFilter(int port, int portToConnect, boolean rabbitmq) {
+        public PackageFilter(String serverIP, int port, int portToConnect, boolean rabbitmq) {
+            this.serverIP = serverIP;
             PORT = port;
             PORTTOCONNECT = portToConnect;
             this.useRabbitMQ = rabbitmq;
@@ -187,8 +189,8 @@
         }
 
         public static void main(String[] args) {
-            //new Thread(new PackageFilter(20002, 10000, false)).start(); // externo (pros clientes)
-            new Thread(new PackageFilter(20001, 10000, true)).start(); // interno (pros dispositivos IoT)
+            //new Thread(new PackageFilter(Env.externalFirewallHost, 20002, 10000, false)).start(); // externo (pros clientes)
+            new Thread(new PackageFilter(Env.internalFirewallHost, 20001, 10000, true)).start(); // interno (pros dispositivos IoT)
         }
 
     }

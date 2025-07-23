@@ -21,6 +21,7 @@ public class Client implements Runnable {
     private final int SERVER_PORT = 30001;
 
     private int destinationPort = 9001;
+    private String destinationIP = Env.analyticsHost;
 
     @Override
     public void run() {
@@ -29,9 +30,11 @@ public class Client implements Runnable {
 
             socket = new Socket();
             socket.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), PORT));
-            socket.connect(new InetSocketAddress(Env.localhost, 20002));
+            socket.connect(new InetSocketAddress(Env.externalFirewallHost, 20002));
 
             output = new ObjectOutputStream(socket.getOutputStream());
+
+            System.out.println("Mensagens definidas para Servidor de Análise");
 
             Scanner scan = new Scanner(System.in);
             while(connexion) {
@@ -40,15 +43,23 @@ public class Client implements Runnable {
 
                 if(msg.contains("9002")) {
                     destinationPort = 9002;
-                }
+                    destinationIP = Env.storageHost;
 
-                Message<String> messageToSend = new Message<String>(msg);
-                messageToSend.setSourceIp(InetAddress.getLocalHost().getHostAddress());
-                messageToSend.setSourcePort(socket.getLocalPort());
-                messageToSend.setDestinationIp(Env.localhost);
-                messageToSend.setDestinationPort(destinationPort);
-                output.writeObject(messageToSend);
-                output.flush();
+                    System.out.println("Mensagens definidas para Servidor de Armazenamento");
+                } else if(msg.contains("9001")) {
+                    destinationPort = 9001;
+                    destinationIP = Env.analyticsHost;
+
+                    System.out.println("Mensagens definidas para Servidor de Análise");
+                } else {
+                    Message<String> messageToSend = new Message<String>(msg);
+                    messageToSend.setSourceIp(InetAddress.getLocalHost().getHostAddress());
+                    messageToSend.setSourcePort(socket.getLocalPort());
+                    messageToSend.setDestinationIp(destinationIP);
+                    messageToSend.setDestinationPort(destinationPort);
+                    output.writeObject(messageToSend);
+                    output.flush();
+                }
 
                 if(msg.equals("disconnect")) {
                     connexion = false;

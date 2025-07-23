@@ -36,7 +36,7 @@
             try {
                 socket = new Socket();
                 socket.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), port));
-                socket.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), 20001));
+                socket.connect(new InetSocketAddress(Env.internalFirewallHost, 20001));
 
                 output = new ObjectOutputStream(socket.getOutputStream());
                 Scanner scan = new Scanner(System.in);
@@ -49,7 +49,7 @@
                         try {
                             messageToSend.setSourceIp(InetAddress.getLocalHost().getHostAddress());
                             messageToSend.setSourcePort(socket.getLocalPort());
-                            messageToSend.setDestinationIp(Env.localhost);
+                            messageToSend.setDestinationIp(Env.storageHost);
                             messageToSend.setDestinationPort(9002);
                             output.writeObject(messageToSend);
                             output.flush();

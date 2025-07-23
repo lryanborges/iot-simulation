@@ -50,13 +50,13 @@ public class ReverseProxy implements Runnable {
             InetAddress address = connectedSocket.getInetAddress();
 
             authSocket = new Socket();
-            authSocket.bind(new InetSocketAddress(Env.localhost, 9010));
-            authSocket.connect(new InetSocketAddress(Env.localhost, 9001));
+            authSocket.bind(new InetSocketAddress(Env.analyticsHost, 9010));
+            authSocket.connect(new InetSocketAddress(Env.proxyHost, 9001));
             authOutput = new ObjectOutputStream(authSocket.getOutputStream());
 
             storageSocket = new Socket();
-            storageSocket.bind(new InetSocketAddress(Env.localhost, 9020));
-            storageSocket.connect(new InetSocketAddress(Env.localhost, 9002));
+            storageSocket.bind(new InetSocketAddress(Env.storageHost, 9020));
+            storageSocket.connect(new InetSocketAddress(Env.proxyHost, 9002));
             storageOutput = new ObjectOutputStream(storageSocket.getOutputStream());
 
             Socket iotConnectedSocket = serverSocket.accept();
@@ -94,10 +94,10 @@ public class ReverseProxy implements Runnable {
                 request.setDestinationPort(9002);
                 */
 
-                if((receivedMsg.getDestinationIp().equals(Env.localhost) || receivedMsg.getDestinationIp().equals(Env.iotHost) || receivedMsg.getDestinationIp().equals(Env.clientHost)) && receivedMsg.getDestinationPort() == 9001){
+                if(receivedMsg.getDestinationIp().equals(Env.analyticsHost) && receivedMsg.getDestinationPort() == 9001){
                     authOutput.writeObject(receivedMsg);
                     authOutput.flush();
-                } else if((receivedMsg.getDestinationIp().equals(Env.localhost) || receivedMsg.getDestinationIp().equals(Env.iotHost) || receivedMsg.getDestinationIp().equals(Env.clientHost)) && receivedMsg.getDestinationPort() == 9002){
+                } else if(receivedMsg.getDestinationIp().equals(Env.storageHost)&& receivedMsg.getDestinationPort() == 9002){
                     storageOutput.writeObject(receivedMsg);
                     storageOutput.flush();
                 } else {
