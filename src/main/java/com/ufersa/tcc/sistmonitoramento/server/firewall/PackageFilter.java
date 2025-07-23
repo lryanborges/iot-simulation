@@ -61,6 +61,7 @@
 
                 while(firewallOn) {
                     Socket connectedSocket = serverSocket.accept();
+
                     new Thread( () -> {
 
                         try {
@@ -68,7 +69,7 @@
                             InetAddress address = connectedSocket.getInetAddress();
                             String ip = Functions.getIP(address);
 
-                            if(ip.equals(Env.localhost)) {
+
                                 while(connexion) {
                                     Message<String> receivedMsg = (Message<String>) input.readObject();
 
@@ -119,7 +120,7 @@
                                     }
 
                                 }
-                            }
+
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -144,12 +145,17 @@
 
         private void applyDefaultRules() {
             // -1 é o código que eu defini pra 'any'
-            rules.add(new Rule(Env.localhost, 7002, Env.localhost, -1, false));
+            rules.add(new Rule(Env.clientHost, 7002, Env.analyticsHost, -1, false));
+            rules.add(new Rule(Env.clientHost, 7002, Env.storageHost, -1, false));
+            rules.add(new Rule(Env.invaderHost, -1, Env.localhost, -1, false));
+            rules.add(new Rule(Env.invaderHost, -1, Env.analyticsHost, -1, false));
+            rules.add(new Rule(Env.invaderHost, -1, Env.storageHost, -1, false));
+            rules.add(new Rule(Env.invaderHost, -1, Env.proxyHost, -1, false));
             rules.add(new Rule("localhost", -1, "localhost", -1, true));
-            rules.add(new Rule(Env.localhost, 7001, Env.localhost, -1, true));
-            rules.add(new Rule(Env.localhost, 6001, Env.localhost, -1, true));
+            rules.add(new Rule(Env.clientHost, 7001, Env.localhost, -1, true));
+            rules.add(new Rule(Env.iotHost, 6001, Env.localhost, -1, true));
             for (int i = 2; i <= 100; i++) { // pra setar pra permitir os iotdevices do 6002 ao 6100 (99 outros q faltavam)
-                rules.add(new Rule(Env.localhost, 6000 + i, Env.localhost, -1, true));
+                rules.add(new Rule(Env.iotHost, 6000 + i, Env.localhost, -1, true));
             }
             rules.add(new Rule(Env.localhost, 15000, Env.localhost, -1, true));
         }

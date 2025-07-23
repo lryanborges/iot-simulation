@@ -29,7 +29,7 @@ public class Client implements Runnable {
 
             socket = new Socket();
             socket.bind(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), PORT));
-            socket.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), 20002));
+            socket.connect(new InetSocketAddress(Env.localhost, 20002));
 
             output = new ObjectOutputStream(socket.getOutputStream());
 
@@ -38,7 +38,7 @@ public class Client implements Runnable {
                 System.out.print("Digite sua mensagem: ");
                 String msg = scan.nextLine();
 
-                if(msg.equals("9002")) {
+                if(msg.contains("9002")) {
                     destinationPort = 9002;
                 }
 

@@ -2,14 +2,13 @@ package com.ufersa.tcc.sistmonitoramento.server.microservices;
 
 import com.ufersa.tcc.sistmonitoramento.Env;
 import com.ufersa.tcc.sistmonitoramento.datagram.Message;
-import com.ufersa.tcc.sistmonitoramento.functions.Functions;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Authenticator implements Runnable {
+public class Analytics implements Runnable {
 
     boolean connexion = true;
 
@@ -28,7 +27,7 @@ public class Authenticator implements Runnable {
                 String msg = receivedMsg.getMessage();
 
                 // verificação p ver se quem enviou a mensagem foi um dispositivo IoT
-                if (receivedMsg.getSourceIp().equals(Env.localhost) && receivedMsg.getSourcePort() >= 6000 && receivedMsg.getSourcePort() <= 6100 ) {
+                if (receivedMsg.getSourceIp().equals(Env.iotHost) && receivedMsg.getSourcePort() >= 6000 && receivedMsg.getSourcePort() <= 6100 ) {
                     System.out.println(receivedMsg.getSourceIp() + ":" + receivedMsg.getSourcePort() + " -> " + msg);
                 } else {
                     System.out.println("Recebida do Cliente: " + msg);
@@ -55,6 +54,6 @@ public class Authenticator implements Runnable {
     }
 
     public static void main(String[] args) {
-        new Thread(new Authenticator()).start();
+        new Thread(new Analytics()).start();
     }
 }
