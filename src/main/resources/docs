@@ -1,0 +1,13 @@
+Portas
+--------
+Filtro de pacotes externo -> 20002
+
+--------
+Proxy reverso -> 10000
+
+--------
+Client1 -> 7001
+
+--------
+Authenticator -> 9001
+Storage -> 9002
