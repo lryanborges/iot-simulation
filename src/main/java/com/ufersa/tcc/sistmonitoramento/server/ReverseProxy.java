@@ -94,52 +94,29 @@ public class ReverseProxy implements Runnable {
                 request.setDestinationPort(9002);
                 */
 
-                if(receivedMsg.getDestinationIp().equals(Env.localhost) && receivedMsg.getDestinationPort() == 9001){
+                if((receivedMsg.getDestinationIp().equals(Env.localhost) || receivedMsg.getDestinationIp().equals(Env.iotHost) || receivedMsg.getDestinationIp().equals(Env.clientHost)) && receivedMsg.getDestinationPort() == 9001){
                     authOutput.writeObject(receivedMsg);
                     authOutput.flush();
-                } else if(receivedMsg.getDestinationIp().equals(Env.localhost) && receivedMsg.getDestinationPort() == 9002){
+                } else if((receivedMsg.getDestinationIp().equals(Env.localhost) || receivedMsg.getDestinationIp().equals(Env.iotHost) || receivedMsg.getDestinationIp().equals(Env.clientHost)) && receivedMsg.getDestinationPort() == 9002){
                     storageOutput.writeObject(receivedMsg);
                     storageOutput.flush();
                 } else {
                     System.out.println("Destinatário desconhecido");
                 }
 
-                if(msg.equals("disconnect")) {
+                if(msg.equals("disconnect") || Functions.turnOffProxy()) {
                     conexion = false;
                 }
             }
+
+            generateDashboard(iotHandle);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
-            System.out.println("------------------------------------------------------");
-            System.out.println("\t\tDASHBOARD - RESULTADOS PÓS-EXECUÇÃO");
-            System.out.println("------------------------------------------------------");
-            System.out.println("⏳ Tempo de Execução: " + Functions.getElapsedTime());
-            System.out.println("📊 Média de Temperatura: " + String.format("%.2f", iotHandle.getTemperatureMean()) + "ºC");
-            System.out.println("📊 Média de Pressão Atmosférica: " + String.format("%.2f", iotHandle.getPressureMean()) + " hPa" );
-            System.out.println("📊 Média de Umidade do Ar: " + String.format("%.2f", iotHandle.getHumidityMean()) + "%");
-            System.out.println("📊 Média de Velociade do Vento: " + String.format("%.2f", iotHandle.getWindMean()) + " m/s");
-            System.out.println("------------------------------------------------------");
-            System.out.println("\uD83D\uDCE6 Total de Registros Processados: " + iotHandle.getLogsCounter());
-            System.out.println("\uD83D\uDEA8 Alertas Detectados: " + iotHandle.getAlarmsCounter() + "(" + iotHandle.getAlarmsPercent() + "%)");
-            System.out.println("\uD83C\uDF21\uFE0F Temperatura: ");
-            System.out.println("\t- < 22ºC: " + iotHandle.getLowTempCounter());
-            System.out.println("\t- > 35ºC: " + iotHandle.getHighTempCounter());
-            System.out.println("\uD83D\uDCC8 Pressão Atmosférica: ");
-            System.out.println("\t- < 1000 hPa: " + iotHandle.getLowPressCounter());
-            System.out.println("\t- > 1020 hPa: " + iotHandle.getHighPressCounter());
-            System.out.println("\uD83D\uDCA7 Umidade Relativa do Ar: ");
-            System.out.println("\t- < 40%: " + iotHandle.getLowHumidCounter());
-            System.out.println("\t- > 80%: " + iotHandle.getHighHumidCounter());
-            System.out.println("\uD83D\uDCA8 Velocidade do Vento: ");
-            System.out.println("\t- < 2 m/s: " + iotHandle.getLowWindCounter());
-            System.out.println("\t- > 10 m/s: " + iotHandle.getHighWindCounter());
-            System.out.println("------------------------------------------------------");
-            Functions.getFileInfo();
-            System.out.println("------------------------------------------------------");
+            generateDashboard(iotHandle);
             /*try {
                 storageOutput.close();
                 storageSocket.close();
@@ -153,6 +130,35 @@ public class ReverseProxy implements Runnable {
             }*/
         }
 
+    }
+
+    public static void generateDashboard(IoTHandle iotHandle) {
+        System.out.println("------------------------------------------------------");
+        System.out.println("\t\tDASHBOARD - RESULTADOS PÓS-EXECUÇÃO");
+        System.out.println("------------------------------------------------------");
+        System.out.println("⏳ Tempo de Execução: " + Functions.getElapsedTime());
+        System.out.println("📊 Média de Temperatura: " + String.format("%.2f", iotHandle.getTemperatureMean()) + "ºC");
+        System.out.println("📊 Média de Pressão Atmosférica: " + String.format("%.2f", iotHandle.getPressureMean()) + " hPa" );
+        System.out.println("📊 Média de Umidade do Ar: " + String.format("%.2f", iotHandle.getHumidityMean()) + "%");
+        System.out.println("📊 Média de Velociade do Vento: " + String.format("%.2f", iotHandle.getWindMean()) + " m/s");
+        System.out.println("------------------------------------------------------");
+        System.out.println("\uD83D\uDCE6 Total de Registros Processados: " + iotHandle.getLogsCounter());
+        System.out.println("\uD83D\uDEA8 Alertas Detectados: " + iotHandle.getAlarmsCounter() + "(" + iotHandle.getAlarmsPercent() + "%)");
+        System.out.println("\uD83C\uDF21\uFE0F Temperatura: ");
+        System.out.println("\t- < 22ºC: " + iotHandle.getLowTempCounter());
+        System.out.println("\t- > 35ºC: " + iotHandle.getHighTempCounter());
+        System.out.println("\uD83D\uDCC8 Pressão Atmosférica: ");
+        System.out.println("\t- < 1000 hPa: " + iotHandle.getLowPressCounter());
+        System.out.println("\t- > 1020 hPa: " + iotHandle.getHighPressCounter());
+        System.out.println("\uD83D\uDCA7 Umidade Relativa do Ar: ");
+        System.out.println("\t- < 40%: " + iotHandle.getLowHumidCounter());
+        System.out.println("\t- > 80%: " + iotHandle.getHighHumidCounter());
+        System.out.println("\uD83D\uDCA8 Velocidade do Vento: ");
+        System.out.println("\t- < 2 m/s: " + iotHandle.getLowWindCounter());
+        System.out.println("\t- > 10 m/s: " + iotHandle.getHighWindCounter());
+        System.out.println("------------------------------------------------------");
+        Functions.getFileInfo();
+        System.out.println("------------------------------------------------------");
     }
 
     public static void main(String[] args) {

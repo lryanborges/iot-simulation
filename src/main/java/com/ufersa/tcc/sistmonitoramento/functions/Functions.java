@@ -64,4 +64,11 @@ public class Functions {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
+    public static boolean turnOffProxy() {
+        Duration elapsed = Duration.between(executionStart, Instant.now());
+        Duration target = Duration.ofHours(2).plusMinutes(0);
+
+        return elapsed.compareTo(target) >= 0;
+    }
+
 }

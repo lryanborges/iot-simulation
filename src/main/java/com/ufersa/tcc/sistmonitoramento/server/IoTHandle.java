@@ -29,6 +29,8 @@ public class IoTHandle implements Runnable {
     InetAddress iotAddress;
 
     private final static String QUEUE_NAME = "iot_logs";
+    private Channel rabbitChannel;
+    private String rabbitConsumerTag;
 
     private int weight;
     private final List<Double> temperatureBuffer = new ArrayList<>();
@@ -97,11 +99,20 @@ public class IoTHandle implements Runnable {
                     System.out.println("Destinatário desconhecido");
                 }
 
-                if(msg.equals("disconnect")) {
+                if(msg.equals("disconnect") || Functions.turnOffProxy()) {
                     conexion = false;
+
+                    try {
+                        if (rabbitChannel != null && rabbitConsumerTag != null) {
+                            rabbitChannel.basicCancel(rabbitConsumerTag);
+                            System.out.println("[RabbitMQ] Consumo cancelado devido ao desligamento do proxy.");
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Erro ao cancelar consumo do RabbitMQ");
+                        e.printStackTrace();
+                    }
                 }
 
-                System.out.println(msg);
             }
 
         } catch (IOException e) {
@@ -121,6 +132,8 @@ public class IoTHandle implements Runnable {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
             channel.queueDeclare(QUEUE_NAME, true, false, false, null);
+
+            this.rabbitChannel = channel;
 
             System.out.println("[RabbitMQ] Consumidor iniciado...");
 
@@ -144,7 +157,7 @@ public class IoTHandle implements Runnable {
                         double pressao = Double.parseDouble(matcher.group(3).replace(",", "."));
                         double vento = Double.parseDouble(matcher.group(4).replace(",", "."));
 
-                        calcMean(temperatura, umidade, pressao, vento);
+                        calcMean(temperatura, pressao, umidade, vento);
 
                         logsCounter++;
 
@@ -192,6 +205,7 @@ public class IoTHandle implements Runnable {
                     // se disparar o alarme, também envia pro server q armazena os logs alarmados
                     if (alarm && msg.getDestinationPort() != 9001) { // mudar dps tmb pra em relação ao ip
                         authOutput.writeObject(msg);
+                        authOutput.flush();
                     }
 
                     if(msg.getDestinationIp().equals(Env.localhost) && msg.getDestinationPort() == 9002){
@@ -207,7 +221,7 @@ public class IoTHandle implements Runnable {
                 }
             };
 
-            channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {});
+            this.rabbitConsumerTag = channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {});
 
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
