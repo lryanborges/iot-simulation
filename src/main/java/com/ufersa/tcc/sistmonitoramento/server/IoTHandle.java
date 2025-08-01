@@ -89,10 +89,10 @@ public class IoTHandle implements Runnable {
 
                 // consumir do rabbitmq é pelo método lá embaixo
 
-                if(receivedMsg.getDestinationIp().equals(Env.localhost) && receivedMsg.getDestinationPort() == 9001){
+                if(receivedMsg.getDestinationIp().equals(Env.analyticsHost) && receivedMsg.getDestinationPort() == 9001){
                     authOutput.writeObject(receivedMsg);
                     authOutput.flush();
-                } else if(receivedMsg.getDestinationIp().equals(Env.localhost) && receivedMsg.getDestinationPort() == 9002){
+                } else if(receivedMsg.getDestinationIp().equals(Env.storageHost) && receivedMsg.getDestinationPort() == 9002){
                     storageOutput.writeObject(receivedMsg);
                     storageOutput.flush();
                 } else {
@@ -125,7 +125,7 @@ public class IoTHandle implements Runnable {
     private void consumeFromRabbitMQ() {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setHost(Env.proxyHost);
             factory.setUsername("guest");
             factory.setPassword("guest");
 
@@ -208,7 +208,7 @@ public class IoTHandle implements Runnable {
                         authOutput.flush();
                     }
 
-                    if(msg.getDestinationIp().equals(Env.localhost) && msg.getDestinationPort() == 9002){
+                    if(msg.getDestinationIp().equals(Env.storageHost) && msg.getDestinationPort() == 9002){
                         storageOutput.writeObject(msg);
                         storageOutput.flush();
                     }

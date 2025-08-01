@@ -66,7 +66,7 @@ public class Functions {
 
     public static boolean turnOffProxy() {
         Duration elapsed = Duration.between(executionStart, Instant.now());
-        Duration target = Duration.ofHours(2).plusMinutes(0);
+        Duration target = Duration.ofHours(2).plusMinutes(2);
 
         return elapsed.compareTo(target) >= 0;
     }
